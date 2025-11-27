@@ -44,6 +44,7 @@ class EmbeddingGenerator:
         ollama_url: str = "http://localhost:11434",
         model: str = "nomic-embed-text",
         api_key: str | None = None,
+        base_url: str | None = None,
         timeout: int = 30,
         cache_size: int = 10000,
         cache_ttl: int = 3600,
@@ -56,6 +57,7 @@ class EmbeddingGenerator:
             ollama_url: Ollama API URL (for provider="ollama")
             model: Embedding model name
             api_key: API key (for OpenAI/HuggingFace)
+            base_url: Base URL for API (for OpenAI-compatible APIs like OpenRouter)
             timeout: Request timeout in seconds
             cache_size: Maximum number of embeddings to cache (default 10k)
             cache_ttl: Cache TTL in seconds (default 1 hour)
@@ -64,6 +66,7 @@ class EmbeddingGenerator:
         self.ollama_url = ollama_url
         self.model = model
         self.api_key = api_key
+        self.base_url = base_url
         self.timeout = timeout
         self.client = httpx.AsyncClient(timeout=timeout)
 
@@ -149,7 +152,7 @@ class EmbeddingGenerator:
         return data["embedding"]
 
     async def _generate_openai(self, text: str) -> list[float]:
-        """Generate embedding via OpenAI."""
+        """Generate embedding via OpenAI or OpenAI-compatible API (OpenRouter, etc.)."""
         float_event("llm.embed.openai_call", model=self.model)
 
         headers = {
@@ -157,8 +160,12 @@ class EmbeddingGenerator:
             "Content-Type": "application/json",
         }
 
+        # Use custom base_url if provided (for OpenRouter, Azure, etc.)
+        api_url = self.base_url or "https://api.openai.com/v1"
+        api_url = api_url.rstrip("/")
+        
         response = await self.client.post(
-            "https://api.openai.com/v1/embeddings",
+            f"{api_url}/embeddings",
             headers=headers,
             json={"model": self.model, "input": text},
         )

@@ -189,11 +189,17 @@ class EmbeddingProviderFactory:
                 "Set it in config.yaml or via HELIX_EMBEDDING_API_KEY env variable"
             )
 
+        # For OpenAI-compatible providers, use embedding_url as base_url
+        base_url = None
+        if provider_name == "openai" and config.embedding_url != "http://localhost:11434":
+            base_url = config.embedding_url
+
         embedder = EmbeddingGenerator(
             provider=config.embedding_provider,
             ollama_url=config.embedding_url,
             model=config.embedding_model,
             api_key=config.embedding_api_key,
+            base_url=base_url,
             timeout=config.timeout,
         )
 

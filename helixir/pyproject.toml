@@ -1,0 +1,269 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "helixir"
+version = "0.1.0"
+description = "Multi-Agent Memory Framework powered by HelixDB"
+readme = "README.md"
+requires-python = ">=3.14"
+license = {text = "AGPL-3.0-or-later"}
+authors = [
+    {name = "Nikita Rulenko (x.com/dengoslav)"}
+]
+keywords = [
+    "helixdb",
+    "helixir",
+    "memory",
+    "llm",
+    "multi-agent",
+    "mcp",
+    "graph-database",
+    "vector-database",
+    "reasoning"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Database",
+]
+
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0",
+    "tenacity>=8.0.0",
+    "typing-extensions>=4.5.0",
+    "rich>=13.7.0",  # For logging and formatting
+    "chonkie>=1.4.1",
+    "requests>=2.32.5",
+    "fastmcp>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+    "black>=24.0.0",
+]
+llm = [
+    "openai>=1.0.0",
+    "anthropic>=0.18.0",
+]
+all = [
+    "helixir[dev,llm]",
+]
+
+[project.urls]
+Homepage = "https://github.com/helixdb/helixir"
+Documentation = "https://github.com/helixdb/helixir"
+Repository = "https://github.com/helixdb/helixir"
+Issues = "https://github.com/helixdb/helixir/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["helixir*"]
+
+[tool.setuptools.package-data]
+helixir = ["schema/*.hx", "py.typed"]
+
+# === PYTEST ===
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "--cov=helix_memory",
+    "--cov-report=term-missing",
+    # HTML/XML reports disabled - use terminal output only
+    # "--cov-report=html",
+    # "--cov-report=xml",
+]
+markers = [
+    "unit: Unit tests (fast)",
+    "integration: Integration tests (requires HelixDB)",
+    "e2e: End-to-end tests (requires HelixDB + LLM)",
+    "slow: Slow tests",
+]
+
+# === RUFF ===
+[tool.ruff]
+target-version = "py314"  # Python 3.14
+line-length = 100
+src = ["src", "tests"]
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "ALL",  # Enable ALL rules, then selectively ignore
+]
+ignore = [
+    # Formatter conflicts
+    "E501",   # line too long (handled by formatter)
+    "COM812", # missing trailing comma (conflicts with formatter)
+    "ISC001", # single-line-implicit-string-concatenation
+    
+    # Docstrings (we'll add them later)
+    "D",      # pydocstyle (docstrings)
+    
+    # Type annotations (we use mypy)
+    "ANN",    # flake8-annotations
+    
+    # Too strict for dev
+    "FIX",    # flake8-fixme (TODOs are OK)
+    "TD",     # flake8-todos
+    "ERA",    # eradicate (commented code)
+    
+    # Conflicts with async patterns
+    "B008",   # do not perform function calls in argument defaults
+    
+    # Not needed for our use case
+    "DJ",     # flake8-django
+    "NPY",    # numpy-specific
+    "PD",     # pandas-specific
+    
+    # Too opinionated
+    "EM",     # flake8-errmsg
+    "TRY003", # Avoid specifying long messages outside exception class
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",  # Unused imports
+    "F403",  # Star imports
+]
+"tests/**" = [
+    "S101",  # assert usage
+    "ARG",   # unused arguments
+    "PLR2004", # magic values
+    "SLF001", # private member access
+]
+"examples/**" = [
+    "T201",  # print statements (OK in examples)
+    "INP001", # implicit namespace package
+    "BLE001", # broad exception catching
+    "ARG",   # unused arguments in demos
+    "PLC0415", # import not at top level
+]
+"src/**/manager.py" = [
+    "TRY300",  # return in try (acceptable pattern)
+    "BLE001",  # broad exception (defensive programming)
+    "TC001",   # type checking block (runtime needed)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["helix_memory"]
+force-sort-within-sections = true
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 100
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 15
+max-returns = 6
+max-statements = 50
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = 88
+
+# === MYPY ===
+[tool.mypy]
+python_version = "3.14"  # Python 3.14
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+no_implicit_reexport = true
+show_error_codes = true
+enable_error_code = ["truthy-bool", "redundant-expr"]
+
+# Python 3.14 specific
+enable_incomplete_feature = ["NewGenericSyntax"]  # PEP 695 type parameter syntax
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# === BLACK ===
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Default
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+# === COVERAGE ===
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = [
+    "tests/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+precision = 2
+show_missing = true
+skip_covered = false
+
+# HTML report disabled - use terminal only
+# [tool.coverage.html]
+# directory = "htmlcov"
+

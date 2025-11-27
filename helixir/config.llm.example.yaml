@@ -1,0 +1,17 @@
+# LLM Configuration for Helix Memory SDK
+
+# === Ollama Configuration (Local) ===
+ollama:
+  base_url: "http://localhost:11434"
+  model: "gemma2"
+  temperature: 0.3
+
+# === OpenAI Configuration (Cloud) ===
+openai:
+  api_key: "your-api-key-here"  # Or use OPENAI_API_KEY env var
+  model: "gpt-4"
+  temperature: 0.3
+
+# === Default Provider ===
+default_provider: "ollama"  # or "openai"
+

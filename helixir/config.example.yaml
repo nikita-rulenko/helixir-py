@@ -1,0 +1,29 @@
+# === HelixDB Connection ===
+host: localhost
+port: 6969
+instance: dev
+# api_key: your_api_key_here
+timeout: 30
+max_retries: 3
+
+# === Schema Configuration ===
+# schema_dir: ./schema
+auto_load_schema: true
+
+# === LLM Configuration ===
+llm_provider: openai  # openai, anthropic, local
+llm_model: gpt-4-turbo-preview
+# llm_api_key: your_openai_api_key
+llm_temperature: 0.7
+
+# === Memory Configuration ===
+default_certainty: 80
+default_importance: 50
+conflict_resolution: prefer_newer  # prefer_newer, prefer_higher_certainty, manual
+
+# === Search Configuration ===
+default_search_limit: 10
+vector_search_enabled: true
+graph_search_enabled: true
+bm25_search_enabled: true
+

@@ -1,0 +1,252 @@
+# 🧠 Helixir
+
+> Persistent Memory Framework for AI Assistants
+
+**The fastest AI memory system.** Built on [HelixDB](https://helix-db.com) (1000x faster than Neo4j) with [Cerebras](https://cerebras.ai) inference (70x faster than GPUs). Gives AI assistants **long-term memory with reasoning** — not just storage, but understanding.
+
+**Author:** Nikita Rulenko ([x.com/dengoslav](https://x.com/dengoslav))
+
+## ✨ Features
+
+- **Persistent Memory** - Remember conversations across sessions
+- **Hybrid Search** - Vector + Graph + BM25 combined for best results
+- **Reasoning Chains** - Build logical connections (IMPLIES, BECAUSE, CONTRADICTS)
+- **Cross-User Contradiction Detection** - Auto-detect conflicting memories between users
+- **Memory Supersession** - Update memories while preserving full history
+- **Concept-Based Retrieval** - Search by skills, preferences, goals
+- **MCP Integration** - Works with Cursor, Claude Desktop, and other MCP clients
+- **One-Command Setup** - `./setup.sh` handles everything automatically
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Rust 1.88+** - [Install](https://rustup.rs)
+- **Docker** - [Install](https://docs.docker.com/get-docker/)
+- **uv** - [Install](https://astral.sh/uv) (Python package manager)
+- **Ollama** (optional) - [Install](https://ollama.com) for local embeddings
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/helixdb/helixir.git
+cd helixir
+
+# Run setup wizard
+chmod +x setup.sh
+./setup.sh
+```
+
+The setup wizard will:
+1. ✅ Check dependencies (Rust, Docker, uv)
+2. ✅ Install Python 3.14 (via uv)
+3. ✅ Create virtual environment
+4. ✅ Install Helix CLI
+5. ✅ Install Ollama + embedding model (optional)
+6. ✅ Configure LLM and embedding providers
+7. ✅ Deploy schema to HelixDB
+8. ✅ Seed base memories
+9. ✅ Add to Cursor MCP config
+
+### Manual Setup
+
+If you prefer manual setup:
+
+```bash
+# 1. Install Helix CLI
+curl -sSL https://install.helix-db.com | bash
+
+# 2. Create virtual environment
+uv venv --python 3.14
+source .venv/bin/activate
+
+# 3. Install dependencies
+uv sync
+
+# 4. Start HelixDB
+helix init
+helix push dev
+
+# 5. Configure (edit config.yaml)
+cp helixir/config.example.yaml config.yaml
+
+# 6. Add to ~/.cursor/mcp.json (see MCP Configuration below)
+```
+
+## 🔧 Configuration
+
+### config.yaml
+
+```yaml
+# LLM Provider (for memory extraction & reasoning)
+llm_provider: "cerebras"  # cerebras (free!), ollama, or openai
+llm_model: "llama-3.3-70b"
+llm_api_key: null  # Set via HELIX_LLM_API_KEY env var
+
+# Embedding Provider (for semantic search)
+embedding_provider: "ollama"
+embedding_model: "nomic-embed-text"
+embedding_url: "http://localhost:11434"
+
+# HelixDB Connection
+host: "localhost"
+port: 6969
+instance: "dev"
+```
+
+### MCP Configuration
+
+Add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "helixir": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "helixir.mcp.server"],
+      "cwd": "/path/to/helixir",
+      "env": {
+        "HELIX_HOST": "localhost",
+        "HELIX_PORT": "6969",
+        "HELIX_LLM_PROVIDER": "cerebras",
+        "HELIX_LLM_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+### Cursor Rules (Important!)
+
+To make your AI assistant actually USE the memory, add these rules to **Cursor Settings → Rules**:
+
+```
+- Always use Helixir MCP to remember important things about the project
+- Always use Helixir MCP first to recall context about the current project
+- At the start of chat, store the user's prompt to always remember your role and goals
+- After reaching context window limit (when Cursor summarizes), read your role and user goals from memory again
+- For memory search, use appropriate mode:
+  - "recent" for quick context (last 4 hours)
+  - "contextual" for balanced search (30 days)
+  - "deep" for thorough search (90 days)
+  - "full" for complete history
+- Use search_by_concept for skill/preference/goal queries
+- Use search_reasoning_chain for "why" questions and logical connections
+```
+
+These rules ensure the AI:
+1. **Reads memory** at the start of each session
+2. **Writes memory** after important changes
+3. **Uses memory** to recover context after summarization
+4. **Learns** from past mistakes by searching for similar issues
+
+### Environment Variables
+
+All config values can be overridden via environment:
+
+```bash
+export HELIX_HOST="localhost"
+export HELIX_PORT="6969"
+export HELIX_LLM_PROVIDER="cerebras"
+export HELIX_LLM_API_KEY="your-api-key"
+export HELIX_EMBEDDING_PROVIDER="ollama"
+export HELIX_EMBEDDING_URL="http://localhost:11434"
+```
+
+## 📖 Usage
+
+### MCP Tools (for AI Assistants)
+
+| Tool | Description |
+|------|-------------|
+| `add_memory` | Store new information |
+| `search_memory` | Find memories by semantic query |
+| `search_by_concept` | Search by concept type (skill, preference, goal) |
+| `search_reasoning_chain` | Find logical connections between memories |
+| `update_memory` | Update existing memory |
+| `get_memory_graph` | Visualize memory connections |
+
+### Search Modes
+
+| Mode | Time Window | Use Case |
+|------|-------------|----------|
+| `recent` | 4 hours | Quick context |
+| `contextual` | 30 days | Balanced search |
+| `deep` | 90 days | Thorough search |
+| `full` | All time | Complete history |
+
+### Python API
+
+```python
+from helixir import HelixirClient
+
+client = HelixirClient.from_yaml("config.yaml")
+
+# Add memory
+result = await client.add(
+    content="User prefers dark mode in all applications",
+    user_id="user123",
+    memory_type="preference",
+    context_tags="ui,settings"
+)
+
+# Search memories
+memories = await client.search(
+    query="What are the user's UI preferences?",
+    user_id="user123",
+    mode="contextual"
+)
+
+# Search by concept
+skills = await client.search_by_concept(
+    query="programming skills",
+    user_id="user123",
+    concept_type="skill"
+)
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│              MCP Server                     │
+│  (add_memory, search_memory, etc.)          │
+├─────────────────────────────────────────────┤
+│              HelixirClient                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
+│  │ Memory   │ │ Search   │ │ Chain    │    │
+│  │ Manager  │ │ Engine   │ │ Builder  │    │
+│  └──────────┘ └──────────┘ └──────────┘    │
+├─────────────────────────────────────────────┤
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
+│  │ LLM      │ │ Embedder │ │ Chunker  │    │
+│  │ Provider │ │          │ │          │    │
+│  └──────────┘ └──────────┘ └──────────┘    │
+└─────────────────────────────────────────────┘
+                    │
+            ┌───────▼───────┐
+            │    HelixDB    │
+            │ (Graph+Vector)│
+            └───────────────┘
+```
+
+## 🔗 Links
+
+- [HelixDB Documentation](https://docs.helix-db.com)
+- [Cerebras Cloud](https://cloud.cerebras.ai) - Free LLM inference (70x faster!)
+- [Ollama](https://ollama.com) - Local LLM/embeddings
+
+## 📄 License
+
+**Helixir is dual-licensed:**
+
+1. **AGPL-3.0** - Free for open source projects
+   - If you modify and deploy Helixir as a service, you must open-source your entire codebase
+   - See [LICENSE.txt](LICENSE.txt) and [LICENSE-AGPL.txt](LICENSE-AGPL.txt)
+
+2. **Commercial License** - For proprietary use
+   - Use Helixir without AGPL obligations
+   - Contact: [x.com/dengoslav](https://x.com/dengoslav)
+
+⚠️ **This is NOT MIT!** If you use Helixir as a SaaS without a commercial license, you must open-source ALL your code.

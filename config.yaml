@@ -1,0 +1,76 @@
+# ============================================================
+# Helixir Configuration
+# ============================================================
+#
+# This config defines TWO separate providers:
+# 1. LLM Provider - for text generation (extraction, reasoning, decisions)
+# 2. Embedding Provider - for vector embeddings (semantic search)
+#
+# Priority: ENV variables > config.yaml > defaults
+#
+# ============================================================
+
+# === LLM Provider (Text Generation) ===
+# Used for: memory extraction, reasoning, decision making
+llm_provider: "cerebras"  # Options: "cerebras", "openai", "ollama"
+llm_model: "llama3.3-70b"
+llm_temperature: 0.3
+llm_api_key: null  # Set via HELIX_LLM_API_KEY env var
+
+# Provider-specific settings
+llm_base_url: null  # For Ollama: "http://localhost:11434"
+
+# === Embedding Provider ===
+# Used for: vector search, similarity matching
+embedding_provider: "ollama"  # Options: "ollama", "openai"
+embedding_model: "nomic-embed-text"
+embedding_url: "http://localhost:11434"  # Ollama default
+embedding_api_key: null  # For OpenAI: set via HELIX_EMBEDDING_API_KEY
+
+# === HelixDB Connection ===
+host: "localhost"
+port: 6969
+instance: "dev"
+timeout: 30
+
+# ============================================================
+# RECOMMENDED CONFIGURATIONS
+# ============================================================
+
+# --- PRODUCTION: Fast Inference + Local Embeddings ---
+# llm_provider: "cerebras"
+# llm_model: "llama3.3-70b"
+# llm_api_key: "your-cerebras-api-key"  # Get free at https://cloud.cerebras.ai
+#
+# embedding_provider: "ollama"
+# embedding_model: "nomic-embed-text"
+# embedding_url: "http://localhost:11434"
+
+# --- DEVELOPMENT: All Local (Ollama) ---
+# llm_provider: "ollama"
+# llm_model: "llama3.2"
+# llm_base_url: "http://localhost:11434"
+#
+# embedding_provider: "ollama"
+# embedding_model: "nomic-embed-text"
+# embedding_url: "http://localhost:11434"
+
+# --- CLOUD: OpenAI for Both ---
+# llm_provider: "openai"
+# llm_model: "gpt-4o"
+# llm_api_key: "your-openai-api-key"
+#
+# embedding_provider: "openai"
+# embedding_model: "text-embedding-3-large"
+# embedding_api_key: "your-openai-api-key"
+
+# ============================================================
+# ENVIRONMENT VARIABLES (override config)
+# ============================================================
+# export HELIX_HOST="localhost"
+# export HELIX_PORT="6969"
+# export HELIX_LLM_PROVIDER="cerebras"
+# export HELIX_LLM_MODEL="llama3.3-70b"
+# export HELIX_LLM_API_KEY="your-api-key"
+# export HELIX_EMBEDDING_PROVIDER="ollama"
+# export HELIX_EMBEDDING_URL="http://localhost:11434"

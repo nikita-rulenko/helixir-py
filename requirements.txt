@@ -1,0 +1,9 @@
+# HelixDB - Multi-Agent Memory Framework
+# Python 3.14+ required for T-Strings (PEP 750)
+
+# Core dependencies
+lark-parser==0.12.0  # AST parser for HelixQL
+
+# Install in editable mode:
+# uv pip install -e 'helixir[all]'
+

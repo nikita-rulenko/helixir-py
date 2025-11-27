@@ -1,12 +1,9 @@
 [project]
 name = "helixir"
-version = "0.1.0"
+queries = "./schema/"
 
-[source]
-schema = "schema/schema.hx"
-queries = "schema/queries.hx"
-
-[[instances]]
-name = "dev"
-deploy_mode = "local"
-
+[local.dev]
+port = 6969
+build_mode = "debug"
+mcp = true
+bm25 = true

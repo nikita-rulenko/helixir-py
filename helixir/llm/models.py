@@ -1,12 +1,10 @@
 """Pydantic models for LLM extraction results."""
 
 import json
-from typing import TYPE_CHECKING, Any
+from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, field_serializer
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class ExtractedMemory(BaseModel):

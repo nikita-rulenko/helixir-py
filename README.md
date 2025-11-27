@@ -71,13 +71,58 @@ source .venv/bin/activate
 uv sync
 
 # 4. Start HelixDB
-helix init
 helix push dev
 
 # 5. Configure (edit config.yaml)
 cp helixir/config.example.yaml config.yaml
 
 # 6. Add to ~/.cursor/mcp.json (see MCP Configuration below)
+```
+
+### HelixDB Configuration (helix.toml)
+
+The `helix.toml` file configures HelixDB instances. It's already included in the repo:
+
+```toml
+[project]
+name = "helixir"
+queries = "./schema/"    # Path to .hx files (schema + queries)
+
+[local.dev]
+port = 6969              # HelixDB port
+build_mode = "debug"     # debug | release | dev
+mcp = true               # Enable MCP support
+bm25 = true              # Enable BM25 full-text search
+```
+
+#### Build Modes
+
+| Mode | Use Case | Debug Symbols | Optimizations |
+|------|----------|---------------|---------------|
+| `debug` | Development | Yes | None |
+| `release` | Production | No | Full |
+| `dev` | Dashboard UI | Yes | None |
+
+#### Multiple Instances
+
+```toml
+[local.dev]
+port = 6969
+build_mode = "debug"
+
+[local.production]
+port = 6970
+build_mode = "release"
+```
+
+#### Useful Commands
+
+```bash
+helix push dev      # Build and deploy instance
+helix stop dev      # Stop instance
+helix start dev     # Start stopped instance
+helix status        # Show all instances status
+helix prune dev     # Clean unused containers/images
 ```
 
 ## 🔧 Configuration

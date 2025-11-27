@@ -1,0 +1,8 @@
+[project]
+name = "helixir"
+version = "0.1.0"
+
+[source]
+schema = "schema/schema.hx"
+queries = "schema/queries.hx"
+

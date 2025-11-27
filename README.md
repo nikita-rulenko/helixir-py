@@ -1,6 +1,12 @@
-# 🧠 Helixir
+<p align="center">
+  <img src="helixir_logo.jpeg" alt="Helixir Logo" width="400">
+</p>
 
-> Persistent Memory Framework for AI Assistants
+<h1 align="center">Helixir</h1>
+
+<p align="center">
+  <strong>Associative & Causal AI Memory</strong>
+</p>
 
 **The fastest AI memory system.** Built on [HelixDB](https://helix-db.com) (1000x faster than Neo4j) with [Cerebras](https://cerebras.ai) inference (70x faster than GPUs). Gives AI assistants **long-term memory with reasoning** — not just storage, but understanding.
 

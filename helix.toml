@@ -6,3 +6,7 @@ version = "0.1.0"
 schema = "schema/schema.hx"
 queries = "schema/queries.hx"
 
+[[instances]]
+name = "dev"
+deploy_mode = "local"
+
